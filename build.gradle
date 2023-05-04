@@ -1,0 +1,74 @@
+plugins {
+    id 'org.springframework.boot' version "$springBootVersion"
+    id 'io.spring.dependency-management' version "$springDependencyManagerVersion"
+    id 'com.google.cloud.tools.jib' version "$jibPluginVersion"
+    id 'java'
+    id 'idea'
+}
+
+group = 'com.boutouil.demo'
+version = "$version"
+
+sourceCompatibility = JavaVersion.VERSION_17
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/release" }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Spring Cloud Stream JMS Binder
+    implementation "com.boutouil:spring-cloud-stream-binder-jms:$jmsBinderVersion"
+    // IBM MQ JMS Spring Boot Starter for integration with IBM MQ
+    implementation "com.ibm.mq:mq-jms-spring-boot-starter:$springMQJmsVersion"
+
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+}
+
+dependencyManagement {
+    imports {
+        // SpringCloud BOM/platform dependency. This is the only place you set version of SpringCloud
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
+    }
+}
+
+jib {
+    from {
+        image = "${baseImage}"
+    }
+    to {
+        if (project.hasProperty("repositoryUri")) {
+            image = "${repositoryUri}:${version}"
+        } else {
+            image = "${project.name}:${version}"
+        }
+        if (project.hasProperty("registryUser")
+                && project.hasProperty("registryPassword")) {
+            auth {
+                username = "${registryUser}" // Defined in 'gradle.properties'.
+                password = "${registryPassword}"
+            }
+        } else {
+            credHelper = 'ecr-login'
+        }
+    }
+    container {
+        creationTime = "USE_CURRENT_TIMESTAMP"
+        jvmFlags = ['-XX:InitialRAMPercentage=20.0', '-XX:MinRAMPercentage=50.0', '-XX:MaxRAMPercentage=80.0',
+                    '-XX:+HeapDumpOnOutOfMemoryError', '-XX:+ExitOnOutOfMemoryError', '-Duser.timezone=UTC',
+                    '-Djava.security.egd=file:/dev/./urandom'
+        ]
+    }
+}

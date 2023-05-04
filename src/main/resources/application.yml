@@ -1,0 +1,42 @@
+# IBM MQ environment variables
+IBMMQ_HOST: localhost          # The hostname or IP address of the IBM MQ server
+IBMMQ_PORT: 14140              # The port number on which IBM MQ is listening
+IBMMQ_USER: admin              # The username for connecting to the IBM MQ server
+IBMMQ_PASSWORD: passw0rd       # The password for connecting to the IBM MQ server
+IBMMQ_QUEUE_MANAGER: QM1       # The IBM MQ queue manager name
+IBMMQ_CHANNEL: DEV.ADMIN.SVRCONN # The IBM MQ channel name
+
+# Spring Boot application and Spring Cloud Stream configurations
+spring:
+  application:
+    name: spring-cloud-stream-binder-mq-jms  # The application name
+  cloud:
+    stream:
+      function:
+        definition: priceCalculator           # The bean name of the function to be used in the application
+      bindings:
+        price-calculator-out-0: # The output binding name for the price calculator function
+          destination: queue://PRICE.IN.QUEUE # The destination queue for the price calculator output
+        priceCalculator-in-0: # The input binding name for the price calculator function
+          destination: queue://PRICE.IN.QUEUE # The source queue for the price calculator input
+        priceCalculator-out-0: # The output binding name for the price calculator function
+          destination: queue://PRICE.PERCENTAGE.IN.QUEUE # The destination queue for the price calculator percentage output
+
+# MQ Spring Boot Configuration
+ibm:
+  mq:
+    user: ${IBMMQ_USER}
+    password: ${IBMMQ_PASSWORD}
+    conn-name: ${IBMMQ_HOST}(${IBMMQ_PORT})
+    queue-manager: ${IBMMQ_QUEUE_MANAGER}
+    channel: ${IBMMQ_CHANNEL}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
