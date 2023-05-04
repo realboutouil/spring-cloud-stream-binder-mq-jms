@@ -52,6 +52,19 @@ cd spring-cloud-stream-binder-mq-jms
 
 ![](./images/console-log.png)
 
+7. Easily create a secure Docker image of the application using [Jib](https://github.com/GoogleContainerTools/jib) by
+   executing the following command:
+
+```bash
+./gradlew jibDockerBuild
+```
+
+![](./images/docker-image-jib.png)
+
+**NOTE:** The generated image contains 0 security vulnerabilities, ensuring a safe and secure deployment.
+
+![](./images/console-log.png)
+
 ## Initialize the application
 
 Initialize the Spring Cloud Stream application
